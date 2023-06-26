@@ -23,12 +23,8 @@ jobs:
 
     - name: Build Application
       run: go run main.go
-    - name: Bash Action
-      uses: rethab/bash-action@v1
-      with:
-        command: "echo ls"
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
         name: Build_Artifact
-        path: ${GITHUB_ACTION_PATH}/build
+        path: /home/runner/work/azure-dagger-pipeline/build
