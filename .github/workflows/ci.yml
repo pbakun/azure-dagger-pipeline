@@ -24,12 +24,8 @@ jobs:
     - name: Build Application
       run: go run main.go
 
-    - name: Test
-      run: |
-        ls
-        pwd
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: Build_Artifact
+        name: build_artifact
         path: ./build
