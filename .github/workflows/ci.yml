@@ -23,11 +23,12 @@ jobs:
 
     - name: Release and deploy with Dagger
       run: go run main.go
-    - name: GitHub Script
-      uses: actions/github-script@v2.1.0
+    - name: Bash Action
+      uses: rethab/bash-action@v1
       with:
-        # The script to run
-        script: ls
+        command: |
+          ls
+          pwd
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
