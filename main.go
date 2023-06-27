@@ -21,8 +21,15 @@ func main() {
 	// secretsArr := secrets.GetSecrets(os.Args)
 
 	// err = deployEnv(context.Background(), *client, secretsArr)
-	os.RemoveAll("./build")
-	err = build(context.Background(), *client)
+	outputDir := secrets.GetArgByCode(os.Args, "-o")
+	if outputDir == "" {
+		fmt.Println("Missing build output directory. Pass it using -o command argument like: go run main.go -o <path>")
+		return
+	}
+
+	os.RemoveAll(outputDir)
+	err = build(context.Background(), *client, outputDir)
+
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -69,7 +76,7 @@ func GetAzPwsh(c dagger.Client, dir *dagger.Directory, secrets []secrets.Secret)
 		WithExec([]string{"pwsh", "utilities/AzLogin.ps1"})
 }
 
-func build(ctx context.Context, client dagger.Client) error {
+func build(ctx context.Context, client dagger.Client, outputDirectory string) error {
 
 	dir := client.Host().Directory("./app")
 
@@ -86,7 +93,7 @@ func build(ctx context.Context, client dagger.Client) error {
 
 	output = output.WithDirectory(".", container.Directory("/build"))
 
-	_, err := output.Export(ctx, "./build")
+	_, err := output.Export(ctx, outputDirectory)
 	if err != nil {
 		return err
 	}

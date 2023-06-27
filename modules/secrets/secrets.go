@@ -33,7 +33,7 @@ func NewSecretFromVariable(variable string) *Secret {
 func GetSecrets(args []string) []Secret {
 
 	secrets := []Secret{}
-	candidates := getCandidateIndexes(args)
+	candidates := getCandidateIndexes(args, "-s")
 
 	for _, candidate := range candidates {
 		newSecret := NewSecretFromVariable(args[candidate])
@@ -44,10 +44,17 @@ func GetSecrets(args []string) []Secret {
 	return secrets
 }
 
-func getCandidateIndexes(args []string) []int {
+func GetArgByCode(args []string, argCode string) string {
+	candidates := getCandidateIndexes(args, argCode)
+	if len(candidates) > 0 {
+		return args[candidates[0]]
+	}
+	return ""
+}
+
+func getCandidateIndexes(args []string, argCode string) []int {
 
 	indexes := []int{}
-	argCode := "-s"
 	for i, arg := range args {
 		if len(args) == i+1 {
 			continue
