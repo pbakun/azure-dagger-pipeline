@@ -31,3 +31,21 @@ func TestFindSecrets(t *testing.T) {
 		// t.Errorf("Secret doesn't have correct values")
 	}
 }
+
+func TestGetSecretByName(t *testing.T) {
+	secretsArr := []Secret{}
+	expectedSecretValue := "123456"
+	secretsArr = append(secretsArr,
+		Secret{Name: "appId", Secret: "test123456"},
+		Secret{Name: "tenantId", Secret: expectedSecretValue})
+
+	secret := GetSecretByName(secretsArr, "tenantId")
+	if secret != expectedSecretValue {
+		t.Errorf("The expected secret should be %s, but was %s", expectedSecretValue, secret)
+	}
+
+	secret = GetSecretByName(secretsArr, "TenantId")
+	if secret != expectedSecretValue {
+		t.Errorf("The expected secret should be %s, but was %s", expectedSecretValue, secret)
+	}
+}

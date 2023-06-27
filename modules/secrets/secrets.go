@@ -2,6 +2,8 @@ package secrets
 
 import (
 	"strings"
+
+	"golang.org/x/exp/slices"
 )
 
 type Secret struct {
@@ -42,6 +44,14 @@ func GetSecrets(args []string) []Secret {
 		}
 	}
 	return secrets
+}
+
+func GetSecretByName(secrets []Secret, name string) string {
+	index := slices.IndexFunc(secrets, func(s Secret) bool { return strings.EqualFold(s.Name, name) })
+	if index != -1 {
+		return secrets[index].Secret
+	}
+	return ""
 }
 
 func GetArgByCode(args []string, argCode string) string {

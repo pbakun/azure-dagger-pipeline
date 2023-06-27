@@ -28,8 +28,17 @@ func main() {
 
 		os.RemoveAll(outputDir)
 		err = build(context.Background(), *client, outputDir)
+
 	} else if strings.EqualFold("cd", pipelineMode) {
-		azure.DeployWebApp()
+		secretsArr := secrets.GetSecrets(os.Args)
+		azureServicePrincipal := azure.AzureServicePrincipal{
+			TenantId:       secrets.GetSecretByName(secretsArr, "tenantId"),
+			ClientId:       secrets.GetSecretByName(secretsArr, "appId"),
+			ClientSecret:   secrets.GetSecretByName(secretsArr, "principalPass"),
+			SubscriptionId: secrets.GetSecretByName(secretsArr, "subscriptionId"),
+		}
+		azure.DeployWebApp(azureServicePrincipal, "dagger-webapp")
+
 	}
 	// secretsArr := secrets.GetSecrets(os.Args)
 
@@ -38,39 +47,6 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-
-func deployEnv(ctx context.Context, client dagger.Client, secrets []secrets.Secret) error {
-
-	dir := client.Host().Directory("./scripts")
-
-	pwsh := GetAzPwsh(client, dir, secrets).
-		WithExec([]string{"pwsh", "deployment/step1.ps1"}).
-		WithExec([]string{"pwsh", "deployment/step2.ps1"})
-
-	_, err := pwsh.ExitCode(ctx)
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func GetAzPwsh(c dagger.Client, dir *dagger.Directory, secrets []secrets.Secret) *dagger.Container {
-
-	container := c.Container().
-		From("mcr.microsoft.com/azure-powershell").
-		WithMountedDirectory("/deployScripts", dir).
-		WithWorkdir("/deployScripts")
-
-	for _, secret := range secrets {
-		sec := c.SetSecret(secret.Name, secret.Secret)
-		container = container.WithSecretVariable(secret.Name, sec)
-	}
-
-	return container.
-		// WithExec([]string{"pwsh", "utilities/InstallAzModules.ps1"}).
-		WithExec([]string{"pwsh", "utilities/AzLogin.ps1"})
 }
 
 func build(ctx context.Context, client dagger.Client, outputDirectory string) error {
