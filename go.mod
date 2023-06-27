@@ -1,14 +1,14 @@
-module bakson/dagger/azure
+module bakson/pipelines/dagger
 
 go 1.20
 
 require (
 	dagger.io/dagger v0.6.3
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.6.1
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.3.0
 )
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.6.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.3.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.0.0 // indirect
 	github.com/Khan/genqlient v0.6.0 // indirect

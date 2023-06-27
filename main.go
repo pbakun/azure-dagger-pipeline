@@ -1,12 +1,12 @@
 package main
 
 import (
-	"bakson/dagger/azure/modules/secrets"
+	"bakson/pipelines/dagger/modules/azure"
+	"bakson/pipelines/dagger/modules/secrets"
 	"context"
 	"fmt"
 	"os"
-
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"strings"
 
 	"dagger.io/dagger"
 )
@@ -18,29 +18,26 @@ func main() {
 	}
 	defer client.Close()
 
+	pipelineMode := secrets.GetArgByCode(os.Args, "-m")
+	if strings.EqualFold("ci", pipelineMode) {
+		outputDir := secrets.GetArgByCode(os.Args, "-o")
+		if outputDir == "" {
+			fmt.Println("Missing build output directory. Pass it using -o command argument like: go run main.go -o <path>")
+			return
+		}
+
+		os.RemoveAll(outputDir)
+		err = build(context.Background(), *client, outputDir)
+	} else if strings.EqualFold("cd", pipelineMode) {
+		azure.DeployWebApp()
+	}
 	// secretsArr := secrets.GetSecrets(os.Args)
 
 	// err = deployEnv(context.Background(), *client, secretsArr)
-	outputDir := secrets.GetArgByCode(os.Args, "-o")
-	if outputDir == "" {
-		fmt.Println("Missing build output directory. Pass it using -o command argument like: go run main.go -o <path>")
-		return
-	}
-
-	os.RemoveAll(outputDir)
-	err = build(context.Background(), *client, outputDir)
 
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-
-func deployAzure(ctx context.Context) error {
-	_, err := azidentity.NewClientSecretCredential("", "", "", &azidentity.ClientSecretCredentialOptions{})
-	if err != nil {
-		return err
-	}
-	return err
 }
 
 func deployEnv(ctx context.Context, client dagger.Client, secrets []secrets.Secret) error {
