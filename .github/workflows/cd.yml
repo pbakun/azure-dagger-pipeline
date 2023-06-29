@@ -27,6 +27,5 @@ jobs:
         with:
           workflow: ci.yml
           name: build_artifact
-          path: ./publish
 
       - run: ls
