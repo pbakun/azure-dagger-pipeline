@@ -41,22 +41,15 @@ jobs:
           path: ${{ env.ARTIFACT_DIR }}
           skip_unpack: true
 
-      - name: Manual approval
-        id: approval
-        uses: peter-evans/create-issue-comment@v1
+      - uses: trstringer/manual-approval@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            Workflow requires manual approval.
-            Please review and approve by replying with "/approve".
-
-      - name: Wait for approval
-        id: wait
-        uses: peter-evans/wait-for-comment@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ steps.approval.outputs.issue_number }}
-          comment-author: pbakun
+          secret: ${{ github.TOKEN }}
+          approvers: pbakun
+          issue-title: "Deploying application to prod from staging"
+          issue-body: "Please approve or deny the deployment for application."
+          exclude-workflow-initiator-as-approver: false
+          additional-approved-words: ''
+          additional-denied-words: ''
 
       - name: Deploy
         if: steps.wait.outputs.approved == 'true'
