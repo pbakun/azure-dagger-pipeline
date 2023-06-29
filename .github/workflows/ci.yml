@@ -6,7 +6,9 @@ name: Continous Integration
 on:
   push:
     branches: [ "master" ]
-    paths-ignore: [ ".github/workflows/cd.yml" ]
+    paths-ignore:
+      - ".github/workflows/cd.yml"
+      - "scripts/**"
   pull_request:
     branches: [ "master" ]
 
