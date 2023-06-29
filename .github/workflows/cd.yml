@@ -56,7 +56,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ steps.approval.outputs.issue_number }}
-          comment-author: your-username
+          comment-author: pbakun
 
       - name: Deploy
         if: steps.wait.outputs.approved == 'true'
