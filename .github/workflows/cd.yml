@@ -11,6 +11,11 @@ on:
         required: true
         default: 'warning'
 
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -26,7 +31,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v2.27.0
         with:
           workflow: ci.yml
-          # name: build_artifact
+          name: build_artifact
           path: ./publish
 
       - run: ls
