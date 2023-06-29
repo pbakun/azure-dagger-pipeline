@@ -6,6 +6,8 @@ New-AzWebAppSlot -Name $AppServiceName `
                  -ResourceGroupName $ResourceGroupName `
                  -Slot staging
 
+Write-Host "Publishing $ArtifactName"
+
 Publish-AzWebApp -ResourceGroupName $ResourceGroupName `
                  -Name $AppServiceName `
                  -ArchivePath "/publish/$ArtifactName" `

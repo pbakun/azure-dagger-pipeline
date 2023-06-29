@@ -39,7 +39,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v2.27.0
         with:
           workflow: ci.yml
-          name: build_artifact
+          name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_DIR }}
           skip_unpack: true
 
@@ -57,7 +57,7 @@ jobs:
                          -f deployToStaging
   swap:
     runs-on: ubuntu-latest
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    needs: deploy
     steps:
       - uses: actions/checkout@v3
 
