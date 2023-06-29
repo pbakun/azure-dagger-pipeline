@@ -10,13 +10,23 @@ on:
         description: 'Log level'
         required: true
         default: 'warning'
-      tags:
-        description: 'Test scenario tags'
 
 jobs:
-  printInputs:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-    - run: |
-        echo "Log level: ${{ github.event.inputs.logLevel }}"
-        echo "Tags: ${{ github.event.inputs.tags }}"
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.20"
+
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v2.1.1
+        with:
+            # Artifact name
+          name: build_artifact
+          path: ./publish
+
+      - run: ls
