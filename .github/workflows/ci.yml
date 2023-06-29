@@ -13,12 +13,6 @@ on:
 env:
   OUTPUT_DIR: ./build
 
-permissions:
-  actions: read
-  contents: read
-  id-token: write
-  pull-requests: write
-
 jobs:
 
   build:
