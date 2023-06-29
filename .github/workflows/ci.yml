@@ -8,12 +8,15 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  paths-ignore: [ ".github/workflows/cd.yml" ]
 
 env:
   OUTPUT_DIR: ./build
 
 permissions:
   actions: read
+  contents: read
+  id-token: write
 
 jobs:
 
