@@ -35,7 +35,7 @@ func main() {
 		azureServicePrincipal := azure.AzureServicePrincipal{
 			TenantId:     commandParameters.GetSecretByName(secretsArr, "tenantId"),
 			ClientId:     commandParameters.GetSecretByName(secretsArr, "appId"),
-			ClientSecret: commandParameters.GetSecretByName(secretsArr, "principalPass"),
+			ClientSecret: commandParameters.GetSecretByName(secretsArr, "password"),
 		}
 		variablesArr := commandParameters.GetVariables(os.Args)
 		deploymentVariables := azure.DeploymentVariables{
