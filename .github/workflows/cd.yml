@@ -34,4 +34,6 @@ jobs:
           name: build_artifact
           path: ./publish
 
-      - run: ls
+      - run: |
+          cd publish
+          ls
