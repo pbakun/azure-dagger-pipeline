@@ -19,6 +19,7 @@ permissions:
 
 env:
   ARTIFACT_DIR: publish
+  ARTIFACT_NAME: build_artifact
   RESOURCE_GROUP: dagger-test
   WEB_APP: dagger-webapp
   LOCATION: west europe
@@ -51,7 +52,8 @@ jobs:
                          -v ResourceGroupName=${{ env.RESOURCE_GROUP }} \
                          -v WebAppName=${{ env.WEB_APP }} \
                          -v Location=${{ env.LOCATION }} \
-                         -a publish \
+                         -v ArtifactName=${{ env.ARTIFACT_NAME }}
+                         -a ${{ env.ARTIFACT_DIR }} \
                          -f deployToStaging
   swap:
     runs-on: ubuntu-latest
@@ -79,5 +81,6 @@ jobs:
                           -v ResourceGroupName=${{ env.RESOURCE_GROUP }} \
                           -v WebAppName=${{ env.WEB_APP }} \
                           -v Location=${{ env.LOCATION }} \
-                          -a publish \
+                          -v ArtifactName=${{ env.ARTIFACT_NAME }}
+                          -a ${{ env.ARTIFACT_DIR }} \
                           -f deployToStaging
