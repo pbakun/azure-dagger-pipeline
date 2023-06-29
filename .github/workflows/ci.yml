@@ -12,6 +12,9 @@ on:
 env:
   OUTPUT_DIR: ./build
 
+permissions:
+  actions: read
+
 jobs:
 
   build:
