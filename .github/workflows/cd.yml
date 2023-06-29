@@ -42,27 +42,42 @@ jobs:
           path: ${{ env.ARTIFACT_DIR }}
           skip_unpack: true
 
+      - name: Deploy to staging slot
+        run: |
+          go run main.go -m cd \
+                         -s tenantId=${{ secrets.AZURE_TENANT_ID }} \
+                         -s appId=${{ secrets.AZURE_APP_ID }} \
+                         -s password=${{ secrets.AZURE_PASSWORD }} \
+                         -v ResourceGroupName=${{ env.RESOURCE_GROUP }} \
+                         -v WebAppName=${{ env.WEB_APP }} \
+                         -v Location=${{ env.LOCATION }} \
+                         -a publish \
+                         -f deployToStaging
+  swap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.20"
+
       - uses: trstringer/manual-approval@v1
         with:
           secret: ${{ github.TOKEN }}
           approvers: pbakun
           issue-title: "Deploying application to prod from staging"
           issue-body: "Please approve or deny the deployment for application."
-          exclude-workflow-initiator-as-approver: false
-          additional-approved-words: ''
-          additional-denied-words: ''
 
-      - name: Deploy
-        if: steps.wait.outputs.approved == 'true'
-        run: echo 'deploy'
-      # - name: Deploy to staging slot
-      #   run: |
-      #     go run main.go -m cd \
-      #                    -s tenantId=${{ secrets.AZURE_TENANT_ID }} \
-      #                    -s appId=${{ secrets.AZURE_APP_ID }} \
-      #                    -s password=${{ secrets.AZURE_PASSWORD }} \
-      #                    -v ResourceGroupName=${{ env.RESOURCE_GROUP }} \
-      #                    -v WebAppName=${{ env.WEB_APP }} \
-      #                    -v Location=${{ env.LOCATION }} \
-      #                    -a publish \
-      #                    -f deployToStaging
+      - name: Swap staging and production slot
+        run: |
+          go run main.go -m cd \
+                          -s tenantId=${{ secrets.AZURE_TENANT_ID }} \
+                          -s appId=${{ secrets.AZURE_APP_ID }} \
+                          -s password=${{ secrets.AZURE_PASSWORD }} \
+                          -v ResourceGroupName=${{ env.RESOURCE_GROUP }} \
+                          -v WebAppName=${{ env.WEB_APP }} \
+                          -v Location=${{ env.LOCATION }} \
+                          -a publish \
+                          -f deployToStaging
