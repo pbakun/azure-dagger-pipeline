@@ -16,32 +16,6 @@ type DeploymentVariables struct {
 	ResourceGroupName string
 	WebAppName        string
 	Location          string
-	ArtifactName      string
-}
-
-func DeployWebApp(servicePrincipal AzureServicePrincipal, resourceGroupName string) error {
-
-	// cred, err := azidentity.NewClientSecretCredential(servicePrincipal.TenantId,
-	// 	servicePrincipal.ClientId,
-	// 	servicePrincipal.ClientSecret,
-	// 	&azidentity.ClientSecretCredentialOptions{})
-	// if err != nil {
-	// 	return err
-	// }
-
-	// appServiceClientFactory, err := armappservice.NewClientFactory(servicePrincipal.SubscriptionId, cred, nil)
-	// if err != nil {
-	// 	return nil
-	// }
-
-	// plansClient := appServiceClientFactory.NewPlansClient()
-	// webAppsClient := appServiceClientFactory.NewWebAppsClient()
-	// appServiceClientFactory.NewStaticSitesClient().
-	// 	armappservice.StaticSiteZipDeploymentARMResource{}
-	// webAppsClient.Begin
-
-	// fmt.Print("Deploy to Azure")
-	return nil
 }
 
 func GetAzPwsh(client dagger.Client, servicePrincipal AzureServicePrincipal) *dagger.Container {
@@ -64,4 +38,13 @@ func GetAzPwsh(client dagger.Client, servicePrincipal AzureServicePrincipal) *da
 
 	return container.
 		WithExec([]string{"pwsh", "utilities/AzLogin.ps1"})
+}
+
+func SetDeploymentVariables(container *dagger.Container, deploymentVariable DeploymentVariables) *dagger.Container {
+
+	container = container.WithEnvVariable("ResourceGroupName", deploymentVariable.ResourceGroupName).
+		WithEnvVariable("WebAppName", deploymentVariable.WebAppName).
+		WithEnvVariable("Location", deploymentVariable.Location)
+
+	return container
 }

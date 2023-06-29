@@ -82,6 +82,4 @@ jobs:
                           -v ResourceGroupName=${{ env.RESOURCE_GROUP }} \
                           -v WebAppName=${{ env.WEB_APP }} \
                           -v Location=${{ env.LOCATION }} \
-                          -v ArtifactName=${{ env.ARTIFACT_NAME }}.zip \
-                          -a ${{ env.ARTIFACT_DIR }} \
-                          -f deployToStaging
+                          -f swap

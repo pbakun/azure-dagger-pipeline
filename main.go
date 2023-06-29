@@ -42,12 +42,16 @@ func main() {
 			ResourceGroupName: commandParameters.GetVariableByName(variablesArr, "resourceGroupName"),
 			WebAppName:        commandParameters.GetVariableByName(variablesArr, "webAppName"),
 			Location:          commandParameters.GetVariableByName(variablesArr, "location"),
-			ArtifactName:      commandParameters.GetVariableByName(variablesArr, "ArtifactName"),
 		}
+		artifactName := commandParameters.GetVariableByName(variablesArr, "ArtifactName")
 		artifactPath := commandParameters.GetArgByCode(os.Args, "-a")
 		stepsFolder := commandParameters.GetArgByCode(os.Args, "-f")
-		// azure.DeployWebApp(azureServicePrincipal, "dagger-webapp")
-		err = deploy(context.Background(), *client, artifactPath, stepsFolder, azureServicePrincipal, deploymentVariables)
+
+		if stepsFolder == "deployToStaging" {
+			err = deploy(context.Background(), *client, artifactPath, artifactName, stepsFolder, azureServicePrincipal, deploymentVariables)
+		} else if stepsFolder == "swap" {
+			err = swap(context.Background(), *client, stepsFolder, azureServicePrincipal, deploymentVariables)
+		}
 	}
 
 	if err != nil {
@@ -82,6 +86,7 @@ func build(ctx context.Context, client dagger.Client, outputDirectory string) er
 func deploy(ctx context.Context,
 	client dagger.Client,
 	artifactPath string,
+	artifactName string,
 	stepsFolder string,
 	azureServicePrincipal azure.AzureServicePrincipal,
 	deploymentVariable azure.DeploymentVariables) error {
@@ -89,21 +94,17 @@ func deploy(ctx context.Context,
 	container := azure.GetAzPwsh(client, azureServicePrincipal)
 
 	publishDir := client.Host().Directory(artifactPath)
-	container = container.WithMountedDirectory("/publish", publishDir).
-		WithEnvVariable("ResourceGroupName", deploymentVariable.ResourceGroupName).
-		WithEnvVariable("WebAppName", deploymentVariable.WebAppName).
-		WithEnvVariable("Location", deploymentVariable.Location).
-		WithEnvVariable("ArtifactName", deploymentVariable.ArtifactName)
+	container = azure.SetDeploymentVariables(container, deploymentVariable).
+		WithMountedDirectory("/publish", publishDir).
+		WithEnvVariable("ArtifactName", artifactName)
 
-	stepsPath := fmt.Sprintf("./scripts/deployment/%s", stepsFolder)
-	steps, err := ioutil.ReadDir(stepsPath)
+	stepsPaths, err := getStepsPaths(stepsFolder)
 	if err != nil {
 		return err
 	}
 
-	for _, file := range steps {
-		stepPath := fmt.Sprintf("deployment/%s/%s", stepsFolder, file.Name())
-		container = container.WithExec([]string{"pwsh", stepPath})
+	for _, path := range stepsPaths {
+		container = container.WithExec([]string{"pwsh", path})
 	}
 	_, err = container.ExitCode(ctx)
 
@@ -111,4 +112,46 @@ func deploy(ctx context.Context,
 		return err
 	}
 	return nil
+}
+
+func swap(ctx context.Context,
+	client dagger.Client,
+	stepsFolder string,
+	azureServicePrincipal azure.AzureServicePrincipal,
+	deploymentVariable azure.DeploymentVariables) error {
+
+	container := azure.GetAzPwsh(client, azureServicePrincipal)
+
+	container = azure.SetDeploymentVariables(container, deploymentVariable)
+
+	stepsPaths, err := getStepsPaths(stepsFolder)
+	if err != nil {
+		return err
+	}
+
+	for _, path := range stepsPaths {
+		container = container.WithExec([]string{"pwsh", path})
+	}
+	_, err = container.ExitCode(ctx)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getStepsPaths(folder string) ([]string, error) {
+
+	paths := []string{}
+	stepsPath := fmt.Sprintf("./scripts/deployment/%s", folder)
+	steps, err := ioutil.ReadDir(stepsPath)
+	if err != nil {
+		return paths, err
+	}
+
+	for _, file := range steps {
+		stepPath := fmt.Sprintf("deployment/%s/%s", folder, file.Name())
+		paths = append(paths, stepPath)
+	}
+	return paths, nil
 }
